@@ -1,4 +1,3 @@
-WITH airports_reorder AS (
 WITH airports_regions_join AS (
     SELECT * 
     FROM {{source('staging_flights', 'airports')}}
