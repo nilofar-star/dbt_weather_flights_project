@@ -1,27 +1,29 @@
-WITH daily_data AS (
+WITH hourly_data AS (
     SELECT * 
-    FROM {{ ref('staging_weather_daily') }}
+    FROM {{ref('staging_weather_hourly')}}
 ),
 add_features AS (
     SELECT *
-        , DATE_PART('day', date) AS date_day
-        , DATE_PART('month', date) AS date_month
-        , DATE_PART('year', date) AS date_year
-        , EXTRACT(WEEK FROM date) AS cw  -- Adjusted for general SQL compatibility
-        , TO_CHAR(date, 'Month') AS month_name  -- For databases like PostgreSQL
-        , TO_CHAR(date, 'Day') AS weekday       -- For databases like PostgreSQL
-    FROM daily_data 
+		, timestamp::DATE AS date -- only time (hours:minutes:seconds) as TIME data type
+		, ... AS time -- only time (hours:minutes:seconds) as TIME data type
+        , TO_CHAR(timestamp,'HH24:MI') as hour -- time (hours:minutes) as TEXT data type
+        , TO_CHAR(timestamp, 'FMmonth') AS month_name -- month name as a text
+        , ... AS weekday -- weekday name as text        
+        , DATE_PART('day', timestamp) AS date_day
+		, ... AS date_month
+		, ... AS date_year
+		, ... AS cw
+    FROM hourly_data
 ),
 add_more_features AS (
     SELECT *
-        , (CASE
-            WHEN DATE_PART('month', date) IN (12, 1, 2) THEN 'winter'
-            WHEN DATE_PART('month', date) IN (3, 4, 5) THEN 'spring'
-            WHEN DATE_PART('month', date) IN (6, 7, 8) THEN 'summer'
-            WHEN DATE_PART('month', date) IN (9, 10, 11) THEN 'autumn'
-        END) AS season
+		,(CASE 
+			WHEN time BETWEEN ... AND ... THEN 'night'
+			WHEN ... THEN 'day'
+			WHEN ... THEN 'evening'
+		END) AS day_part
     FROM add_features
 )
+
 SELECT *
 FROM add_more_features
-ORDER BY date
