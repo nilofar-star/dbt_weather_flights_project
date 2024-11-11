@@ -1,14 +1,8 @@
 WITH airports_reorder AS (
-    SELECT faa
-            ,name
-            ,city
-            ,country
-            ,region
-            ,lat
-            ,lon
-            ,alt
-            ,tz
-            ,dst
-    FROM {{ref('staging_airports')}}
-    )
-    SELECT * FROM airports_reorder
+WITH airports_regions_join AS (
+    SELECT * 
+    FROM {{source('staging_flights', 'airports')}}
+    LEFT JOIN {{source('staging_flights', 'regions')}}
+    USING (country)
+)
+SELECT * FROM airports_regions_join
